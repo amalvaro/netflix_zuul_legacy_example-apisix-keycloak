@@ -16,7 +16,8 @@ import org.springframework.util.StringUtils;
 @Component
 public class CustomJwtFilter extends ZuulFilter {
 
-    private static final List<String> OPEN_PATH_PREFIXES = Arrays.asList("/", "/internal");
+    private static final List<String> OPEN_PATH_PREFIXES = Arrays.asList("/internal");
+    private static final List<String> OPEN_PATHS = Arrays.asList("/");
 
     private final String jwtSecret;
     private final String headerName;
@@ -42,7 +43,8 @@ public class CustomJwtFilter extends ZuulFilter {
     public boolean shouldFilter() {
         HttpServletRequest request = RequestContext.getCurrentContext().getRequest();
         String requestUri = request.getRequestURI();
-        return OPEN_PATH_PREFIXES.stream().noneMatch(requestUri::startsWith);
+        return OPEN_PATH_PREFIXES.stream().noneMatch(requestUri::startsWith)
+                && OPEN_PATHS.stream().noneMatch(requestUri::equals);
     }
 
     @Override
