@@ -23,7 +23,7 @@ public class CustomJwtFilter extends ZuulFilter {
     private final String headerName;
 
     public CustomJwtFilter(
-            @Value("${security.jwt.secret:changeit}") String jwtSecret,
+            @Value("${security.jwt.secret:changeitchangeitchangeitchangeitchangeitchangeit}") String jwtSecret,
             @Value("${security.jwt.header:Authorization}") String headerName) {
         this.jwtSecret = jwtSecret;
         this.headerName = headerName;
