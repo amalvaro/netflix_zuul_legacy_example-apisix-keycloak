@@ -7,8 +7,8 @@ spring:
 zuul:
   routes:
     self-hello:
-      path: /proxy/**
-      url: http://localhost:${server.port}/internal
+      path: /api/**
+      url: http://localhost:8081/
       strip-prefix: true
   ignored-services: '*'
 
