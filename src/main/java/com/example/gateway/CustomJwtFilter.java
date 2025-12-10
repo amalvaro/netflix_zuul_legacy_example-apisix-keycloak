@@ -2,8 +2,11 @@ package com.example.gateway;
 
 import com.netflix.zuul.ZuulFilter;
 import com.netflix.zuul.context.RequestContext;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.Claims;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
@@ -21,12 +24,18 @@ public class CustomJwtFilter extends ZuulFilter {
 
     private final String jwtSecret;
     private final String headerName;
+    private final String payloadHeaderName;
+    private final ObjectMapper objectMapper;
 
     public CustomJwtFilter(
             @Value("${security.jwt.secret:changeitchangeitchangeitchangeitchangeitchangeit}") String jwtSecret,
-            @Value("${security.jwt.header:Authorization}") String headerName) {
+            @Value("${security.jwt.header:Authorization}") String headerName,
+            @Value("${security.jwt.payload-header:X-JWT-Payload}") String payloadHeaderName,
+            ObjectMapper objectMapper) {
         this.jwtSecret = jwtSecret;
         this.headerName = headerName;
+        this.payloadHeaderName = payloadHeaderName;
+        this.objectMapper = objectMapper;
     }
 
     @Override
@@ -63,12 +72,22 @@ public class CustomJwtFilter extends ZuulFilter {
             token = tokenHeader.substring(7);
         }
 
+        Claims claims;
         try {
-            Jwts.parser()
+            claims = Jwts.parser()
                     .setSigningKey(jwtSecret.getBytes(StandardCharsets.UTF_8))
-                    .parseClaimsJws(token);
+                    .parseClaimsJws(token)
+                    .getBody();
         } catch (IllegalArgumentException | JwtException ex) {
             rejectRequest(context, HttpServletResponse.SC_UNAUTHORIZED, "Invalid JWT");
+            return null;
+        }
+
+        try {
+            String payload = objectMapper.writeValueAsString(claims);
+            context.addZuulRequestHeader(payloadHeaderName, payload);
+        } catch (JsonProcessingException ex) {
+            rejectRequest(context, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Failed to serialize JWT payload");
         }
 
         return null;
