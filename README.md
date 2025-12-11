@@ -24,7 +24,7 @@ mvn spring-boot:run
 
 В реальной k8s-среде вместо localhost можно указать адреса нужных сервисов и namespace в настройке маршрутов (`src/main/resources/application.yml`).
 
-## Локальный запуск APISIX c Keycloak
+## Локальный запуск APISIX с Keycloak и Dashboard
 
 Для проверки OpenID Connect можно поднять шлюз APISIX и Keycloak через Docker Compose.
 
@@ -35,7 +35,9 @@ docker compose up -d
 В составе разворачиваются два контейнера:
 
 - `keycloak` — доступен на `http://localhost:18080`, учётные данные администратора: `admin`/`admin`. Импортируется примерный realm `apisix` с клиентом `apisix` (секрет `secret`) и тестовым пользователем `user`/`password`.
-- `apisix` — доступен на `http://localhost:9080` (админ API — `http://localhost:9180`). В конфигурации настроен плагин `openid-connect`, перенаправляющий запросы на Keycloak и проксирующий трафик на локально запущенный Zuul (`host.docker.internal:8080`).
+- `etcd` — хранит конфигурацию APISIX и используется дашбордом.
+- `apisix` — доступен на `http://localhost:9080` (админ API — `http://localhost:9180`). При старте выполняется автоматическое создание маршрута `/*` с плагином `openid-connect`, перенаправляющим запросы на Keycloak и проксирующим трафик на локально запущенный Zuul (`host.docker.internal:8080`).
+- `apisix-dashboard` — панель управления APISIX с доступом через браузер на `http://localhost:9000` (логин/пароль: `admin`/`admin`).
 
 Перед проверкой запустите сам сервис Zuul:
 
