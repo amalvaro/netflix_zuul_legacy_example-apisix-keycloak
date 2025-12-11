@@ -9,10 +9,16 @@ apisix:
       key: edd1c9f034335f136f87ad84b625c8f1
       role: admin
 
-deployment:
-  role: data_plane
-  role_data_plane:
-    config_provider: yaml
-
 nginx_config:
   worker_processes: auto
+
+deployment:
+  role: traditional
+  role_traditional:
+    config_provider: etcd
+
+etcd:
+  host:
+    - "http://etcd:2379"
+  prefix: "/apisix"
+  timeout: 30
