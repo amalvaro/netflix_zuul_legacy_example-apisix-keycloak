@@ -1,0 +1,29 @@
+version: "3.8"
+
+services:
+  apisix:
+    image: apache/apisix:3.9.0
+    depends_on:
+      - keycloak
+    environment:
+      APISIX_STAND_ALONE: "true"
+    volumes:
+      - ./docker/apisix/config.yaml:/usr/local/apisix/conf/config.yaml:ro
+      - ./docker/apisix/apisix.yaml:/usr/local/apisix/conf/apisix.yaml:ro
+    ports:
+      - "9080:9080"
+      - "9443:9443"
+      - "9180:9180"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:24.0.3
+    command: ["start-dev", "--import-realm"]
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+    volumes:
+      - ./docker/keycloak/realm-export.json:/opt/keycloak/data/import/realm-export.json:ro
+    ports:
+      - "18080:8080"

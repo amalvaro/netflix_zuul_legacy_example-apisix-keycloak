@@ -1,0 +1,24 @@
+routes:
+  - uri: "/*"
+    name: "zuul-gateway"
+    plugins:
+      session:
+        secret: "local-session-secret"
+        cookie:
+          secure: false
+      openid-connect:
+        client_id: apisix
+        client_secret: secret
+        discovery: http://keycloak:8080/realms/apisix/.well-known/openid-configuration
+        scope: "openid email profile"
+        bearer_only: false
+        logout_path: /logout
+        redirect_uri: "http://localhost:9080/callback"
+        set_access_token_header: true
+        set_id_token_header: true
+        set_userinfo_header: true
+        realm: apisix
+    upstream:
+      type: roundrobin
+      nodes:
+        "host.docker.internal:8080": 1
